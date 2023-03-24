@@ -3,12 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Book;
+
 use App\Form\BookType;
 use App\Repository\BookRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Form\FormTypeInterface;
 
 #[Route('/book')]
 class BookController extends AbstractController
@@ -29,15 +32,39 @@ class BookController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $bookRepository->save($book, true);
+            // $bookRepository->save($book, true);
 
-            return $this->redirectToRoute('app_book_index', [], Response::HTTP_SEE_OTHER);
+            // Upload image
+            $image = $form->get('image')->getData();
+            if ($image) {
+                $originalFilename = pathinfo($image->getClientOriginalName(), 'app.contents_dir');
+                // this is needed to safely include the file name as part of the URL
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$image->guessExtension();
+                // Move the file to the directory where brochures are stored
+                try {
+                    $image->move(
+                        $this->getParameter('image_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    // ... handle exception if something happens during file upload
+                }
+                // updates the 'image' property to store the IMAGE file name
+                // instead of its contents
+                $user->setImage($newFilename);
+            }
+            $userRepository->save($user, true);
+
+            dump($bookRepository);
+            return $this->redirectToRoute('app_book_index', []/*, Response::HTTP_SEE_OTHER*/);
         }
 
         return $this->renderForm('book/new.html.twig', [
             'book' => $book,
-            'form' => $form,
+            'form' => $form, 
         ]);
+        
     }
 
     #[Route('/{id}', name: 'app_book_show', methods: ['GET'])]
@@ -56,14 +83,38 @@ class BookController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $bookRepository->save($book, true);
+        
+                // Upload image
+            $image = $form->get('image')->getData();
+            if ($image) {
+                $originalFilename = pathinfo($image->getClientOriginalName(), 'app.contents_dir');
+                // this is needed to safely include the file name as part of the URL
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$image->guessExtension();
+                // Move the file to the directory where brochures are stored
+                try {
+                    $image->move(
+                        $this->getParameter('image_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    // ... handle exception if something happens during file upload
+                }
+                // updates the 'image' property to store the IMAGE file name
+                // instead of its contents
+                $user->setImage($newFilename);
+            }
+            $userRepository->save($user, true);
+            dump(image);
 
-            return $this->redirectToRoute('app_book_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_book_index', []/*, Response::HTTP_SEE_OTHER*/);
         }
 
         return $this->renderForm('book/edit.html.twig', [
             'book' => $book,
             'form' => $form,
         ]);
+       
     }
 
     #[Route('/{id}', name: 'app_book_delete', methods: ['POST'])]

@@ -6,20 +6,20 @@ use App\Entity\Book;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Form\FormTypeInterface;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 
-class BookType extends AbstractType
+class BookPictureType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('title')
-            ->add('summary')
-            ->add('description')
-            ->add('image', FileType::class, [
+            // ->add('title')
+            // ->add('summary')
+            // ->add('description')
+            ->add('image', FileType::class, [/*
                 'label' => 'Image de profil (jpeg or png)',
                 // unmapped means that this field is not associated to any entity property
                 'mapped' => false,
@@ -29,16 +29,16 @@ class BookType extends AbstractType
                 // unmapped fields can't define their validation using annotations
                 // in the associated entity, so you can use the PHP constraint classes
                 'constraints' => [
-                    new File([
+                    new File([*/
                         'maxSize' => '1024k',
                         'mimeTypes' => [
                             'image/jpeg',
                             'image/png',
                         ],
                         'mimeTypesMessage' => 'Please upload a valid image file',
-                     ])
-                ],
-            ])
+                    ])
+                /*],
+            ])*/
         ;
     }
 
